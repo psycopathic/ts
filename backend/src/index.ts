@@ -1,7 +1,7 @@
 // Starts the HTTP server and closes HTTP/database connections during shutdown.
 import { app } from "./app";
 import { env } from "./config/env";
-import { pool } from "./config/db";
+import { closePool } from "./config/db";
 import { logger } from "./utils/logger";
 
 const server = app.listen(env.PORT, () => {
@@ -27,7 +27,7 @@ const shutdown = (signal: string) => {
 
   server.close(async (error) => {
     try {
-      await pool.end();
+      await closePool();
       if (error) throw error;
       clearTimeout(timeout);
       process.exitCode = 0;

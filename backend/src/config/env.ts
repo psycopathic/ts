@@ -8,7 +8,17 @@ const envSchema = z.object({
   CORS_ORIGIN: z.string().url().default("http://localhost:5173"),
   LOG_LEVEL: z.enum(["error", "warn", "info", "http", "verbose", "debug", "silly"]).default("info"),
   DATABASE_URL: z.string().url().optional(),
-  JWT_SECRET: z.string().optional(),
+  // Public base URL of this API, used in email links and the Google redirect URI.
+  APP_URL: z.string().url().optional(),
+  JWT_ACCESS_SECRET: z.string().min(1).optional(),
+  JWT_REFRESH_SECRET: z.string().min(1).optional(),
+  GOOGLE_CLIENT_ID: z.string().min(1).optional(),
+  GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
+  SMTP_HOST: z.string().min(1).optional(),
+  SMTP_PORT: z.coerce.number().int().min(1).max(65535).default(587),
+  SMTP_USER: z.string().min(1).optional(),
+  SMTP_PASS: z.string().min(1).optional(),
+  EMAIL_FROM: z.string().min(1).optional(),
 });
 
 export const env = envSchema.parse(process.env);
