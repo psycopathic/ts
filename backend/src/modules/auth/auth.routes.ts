@@ -13,7 +13,7 @@ import {
   twoFASetupHandler,
   twoFAVerifyHandler,
   verifyEmail,
-} from "./auth.controllers";
+} from "./auth.controller";
 
 const router = Router();
 

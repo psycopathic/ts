@@ -8,6 +8,7 @@ import { env } from "./config/env";
 import { errorHandler } from "./middleware/errorHandler";
 import authRoutes from "./modules/auth/auth.routes";
 import commentRoutes from "./modules/comments/comments.routes";
+import productRoutes from "./modules/product/product.routes";
 import { ApiError } from "./utils/ApiError";
 import { ApiResponse } from "./utils/ApiResponse";
 import { asyncHandler } from "./utils/asyncHandler";
@@ -34,6 +35,7 @@ app.get("/api/health", asyncHandler(async (_req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/comments", commentRoutes);
+app.use("/api/products", productRoutes);
 
 app.use(asyncHandler(async () => {
   throw new ApiError(404, "Route not found");
