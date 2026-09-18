@@ -22,13 +22,6 @@ const loginSchema = z.object({
   twoFactorCode: z.string().optional(),
 });
 
-const verifyEmailSchema = z.object({ token: z.string().min(1) });
-const forgotPasswordSchema = z.object({ email: z.email() });
-const resetPasswordSchema = z.object({
-  token: z.string().min(1),
-  password: z.string().min(6),
-});
-const googleCallbackSchema = z.object({ code: z.string().min(1) });
 const twoFactorCodeSchema = z.object({ code: z.string().min(1) });
 
 const parse = <T extends z.ZodType>(schema: T, data: unknown): z.output<T> => {
@@ -58,15 +51,6 @@ export const registerUser = asyncHandler(async (req, res) => {
   res.status(201).json(new ApiResponse(201, { user }, "User registered"));
 });
 
-export const verifyEmail = asyncHandler(async (req, res) => {
-  const { token } = parse(verifyEmailSchema, req.query);
-  const alreadyVerified = await authService.verifyEmail(token);
-  const message = alreadyVerified
-    ? "Email is already verified"
-    : "Email is now verified! You can login";
-  res.status(200).json(new ApiResponse(200, null, message));
-});
-
 export const loginUser = asyncHandler(async (req, res) => {
   const { accessToken, refreshToken, user } = await authService.loginUser(
     parse(loginSchema, req.body),
@@ -94,36 +78,6 @@ export const refreshHandler = asyncHandler(async (req, res) => {
 export const logoutHandler = asyncHandler(async (_req, res) => {
   res.clearCookie(REFRESH_COOKIE, refreshCookieOptions);
   res.status(200).json(new ApiResponse(200, null, "Logged out"));
-});
-
-export const forgotPasswordHandler = asyncHandler(async (req, res) => {
-  const { email } = parse(forgotPasswordSchema, req.body);
-  await authService.requestPasswordReset(email);
-  res
-    .status(200)
-    .json(
-      new ApiResponse(200, null, "If an account with this email exists, we will send you a reset link"),
-    );
-});
-
-export const resetPasswordHandler = asyncHandler(async (req, res) => {
-  const { token, password } = parse(resetPasswordSchema, req.body);
-  await authService.resetPassword(token, password);
-  res.status(200).json(new ApiResponse(200, null, "Password reset successfully!"));
-});
-
-export const googleAuthStartHandler = asyncHandler(async (_req, res) => {
-  res.redirect(authService.getGoogleAuthUrl());
-});
-
-export const googleAuthCallbackHandler = asyncHandler(async (req, res) => {
-  const { code } = parse(googleCallbackSchema, req.query);
-  const { accessToken, refreshToken, user } = await authService.loginWithGoogle(code);
-  res.cookie(REFRESH_COOKIE, refreshToken, {
-    ...refreshCookieOptions,
-    maxAge: authService.REFRESH_TOKEN_MAX_AGE_MS,
-  });
-  res.status(200).json(new ApiResponse(200, { accessToken, user }, "Google login successfully"));
 });
 
 export const twoFASetupHandler = asyncHandler(async (req, res) => {
