@@ -5,7 +5,7 @@ import { ApiError } from "../utils/ApiError";
 import { logger } from "../utils/logger";
 
 export type UserRole = "user" | "admin";
-type TokenType = "access" | "refresh" | "verify-email";
+type TokenType = "access" | "refresh";
 
 export const REFRESH_TOKEN_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -24,7 +24,7 @@ const sign = (
   type: TokenType,
   userId: number,
   secret: string,
-  expiresIn: "30m" | "7d" | "1h",
+  expiresIn: "30m" | "7d",
   claims: Record<string, unknown> = {},
 ) => jwt.sign({ ...claims, type }, secret, { subject: String(userId), expiresIn, algorithm: "HS256" });
 
@@ -56,14 +56,6 @@ export const createAccessToken = (userId: number, role: UserRole, tokenVersion: 
 export const createRefreshToken = (userId: number, tokenVersion: number) =>
   sign("refresh", userId, refreshSecret(), "7d", { tokenVersion });
 
-export const createEmailVerifyToken = (userId: number) =>
-  sign("verify-email", userId, accessSecret(), "1h");
-
 export const verifyAccessToken = (token: string) => readVersioned(token, accessSecret(), "access");
 
 export const verifyRefreshToken = (token: string) => readVersioned(token, refreshSecret(), "refresh");
-
-export const verifyEmailVerifyToken = (token: string) => {
-  const result = read(token, accessSecret(), "verify-email");
-  return result ? { userId: result.userId } : null;
-};
